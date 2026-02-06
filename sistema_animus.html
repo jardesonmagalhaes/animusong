@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANIMUS - Sistema de Proteção Animal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 h-20 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-200">
+                <i class="fas fa-paw text-white"></i>
+            </div>
+            <span class="text-2xl font-extrabold tracking-tighter italic uppercase text-slate-800">ANIMUS<span class="text-orange-600">.</span></span>
+        </div>
+        <button onclick="copyPix()" class="bg-slate-900 text-white px-6 py-3 rounded-full font-bold text-xs hover:bg-orange-600 transition shadow-xl uppercase">Copiar PIX</button>
+    </nav>
+
+    <section class="max-w-7xl mx-auto px-6 pt-12">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 text-center">
+                <p class="text-4xl font-black text-orange-600 mb-1" id="count-animais">0</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No Abrigo</p>
+            </div>
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 text-center">
+                <p class="text-4xl font-black text-slate-900 mb-1" id="count-adotados">0</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Adotados/Mês</p>
+            </div>
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 text-center">
+                <p class="text-4xl font-black text-slate-900 mb-1">1.2k</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Refeições/Mês</p>
+            </div>
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 text-center">
+                <p class="text-4xl font-black text-orange-600 mb-1">100%</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Foco Local</p>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl mb-12">
+            <div class="max-w-xl">
+                <h2 class="text-2xl font-black mb-6 uppercase italic">Progresso de Arrecadação</h2>
+                <div class="flex justify-between text-xs font-bold mb-2">
+                    <span class="text-orange-500 uppercase tracking-widest">Arrecadado: <span id="valArrecadado">R$ 0</span></span>
+                    <span class="text-slate-500">Meta: <span id="valMeta">R$ 0</span></span>
+                </div>
+                <div class="w-full bg-white/10 h-6 rounded-full overflow-hidden p-1">
+                    <div id="barProgresso" class="bg-orange-600 h-full rounded-full transition-all duration-1000 flex items-center justify-center text-[10px] font-black" style="width: 0%">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-3xl font-black uppercase mb-8 italic tracking-tighter">Animais para Adoção</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-20" id="gridAnimais">
+            </div>
+    </section>
+
+    <script>
+        // OS DADOS FICAM AQUI DENTRO AGORA
+        const ongData = {
+            institucional: {
+                chavePix: "onganimus@gmail.com",
+            },
+            dashboard: {
+                metaMensal: 5000,
+                arrecadado: 2850, // Teste mudar esse valor!
+                animaisNoAbrigo: 42,
+                adotadosEsteMes: 8
+            },
+            animais: [
+                { nome: "Caramelo", status: "Pronto para Adoção", img: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400" },
+                { nome: "Luna", status: "Em Tratamento", img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400" },
+                { nome: "Baleia", status: "Urgente", img: "https://images.unsplash.com/photo-1560743641-3914f2c45636?w=400" }
+            ]
+        };
+
+        // FUNÇÃO DE INICIALIZAÇÃO
+        function initSystem() {
+            try {
+                // 1. Atualiza Contadores
+                document.getElementById('count-animais').innerText = ongData.dashboard.animaisNoAbrigo;
+                document.getElementById('count-adotados').innerText = ongData.dashboard.adotadosEsteMes;
+                
+                // 2. Atualiza Valores Financeiros
+                document.getElementById('valArrecadado').innerText = `R$ ${ongData.dashboard.arrecadado.toLocaleString('pt-BR')}`;
+                document.getElementById('valMeta').innerText = `R$ ${ongData.dashboard.metaMensal.toLocaleString('pt-BR')}`;
+                
+                // 3. Calcula Barra
+                const porcentagem = Math.round((ongData.dashboard.arrecadado / ongData.dashboard.metaMensal) * 100);
+                const barra = document.getElementById('barProgresso');
+                barra.style.width = porcentagem + '%';
+                barra.innerText = porcentagem + '%';
+
+                // 4. Injeta Animais
+                const grid = document.getElementById('gridAnimais');
+                grid.innerHTML = ''; // Limpa antes de preencher
+                ongData.animais.forEach(pet => {
+                    grid.innerHTML += `
+                        <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all">
+                            <img src="${pet.img}" class="w-full h-56 object-cover">
+                            <div class="p-6 text-center">
+                                <span class="text-[10px] font-black uppercase text-orange-600 bg-orange-50 px-3 py-1 rounded-full">${pet.status}</span>
+                                <h3 class="text-xl font-bold mt-3 uppercase tracking-tight">${pet.nome}</h3>
+                                <button class="mt-4 w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition uppercase">Ver Detalhes</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                console.log("Sistema ANIMUS carregado com sucesso!");
+            } catch (err) {
+                console.error("Erro ao carregar sistema:", err);
+            }
+        }
+
+        // FUNÇÃO DO PIX
+        function copyPix() {
+            const pix = ongData.institucional.chavePix;
+            navigator.clipboard.writeText(pix).then(() => {
+                alert("Chave PIX copiada: " + pix);
+            }).catch(err => {
+                console.error("Erro ao copiar:", err);
+            });
+        }
+
+        // Executa quando a página termina de carregar
+        window.onload = initSystem;
+    </script>
+</body>
+</html>
